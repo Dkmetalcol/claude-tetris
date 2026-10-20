@@ -89,6 +89,18 @@ Después abre `http://localhost:8000` en el navegador.
 | `P`       | Pausar / reanudar                 |
 | `T`       | Cambiar tema claro / oscuro       |
 
+### Power-ups
+
+Cada 5 líneas la siguiente pieza es un bloque especial 1×1 de tipo aleatorio. Su efecto se activa en la posición donde se bloquea:
+
+| Power-up      | Efecto                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| 💣 Bomba      | Destruye un área de 3×3                                                                  |
+| ⚡ Rayo       | Limpia la fila y la columna donde cae                                                    |
+| 🎨 Tinte      | Convierte en comodines (arcoíris) todos los bloques del color de debajo; desaparecen en 1 s |
+| ⬇ Gravedad    | Compacta los huecos del tablero                                                          |
+| ❄ Congelar    | Pausa la caída durante 5 s (puedes seguir moviendo la pieza)                             |
+
 ---
 
 ## Cómo funciona
