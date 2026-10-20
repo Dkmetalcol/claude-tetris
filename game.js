@@ -39,6 +39,13 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeBtn = document.getElementById('theme-toggle');
+
+const THEMES = {
+  dark:  { grid: '#22222e', highlight: 'rgba(255,255,255,0.12)' },
+  light: { grid: '#e3e6f0', highlight: 'rgba(255,255,255,0.35)' },
+};
+let theme = 'dark';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -163,13 +170,13 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillStyle = THEMES[theme].highlight;
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = THEMES[theme].grid;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -216,6 +223,19 @@ function drawNext() {
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+}
+
+function setTheme(name) {
+  theme = name;
+  document.documentElement.dataset.theme = theme;
+  themeBtn.textContent = theme === 'dark' ? '☀' : '☾';
+  // El bucle puede estar cancelado (pausa / game over): redibujar a mano
+  draw();
+  drawNext();
+}
+
+function toggleTheme() {
+  setTheme(theme === 'dark' ? 'light' : 'dark');
 }
 
 function endGame() {
@@ -276,6 +296,7 @@ function init() {
 
 document.addEventListener('keydown', e => {
   if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyT') { toggleTheme(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -300,5 +321,10 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+themeBtn.addEventListener('click', () => {
+  toggleTheme();
+  themeBtn.blur(); // evita que Space active el botón
+});
 
 init();
+setTheme(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
