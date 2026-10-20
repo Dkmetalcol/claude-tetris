@@ -273,6 +273,7 @@ function loop(ts) {
     }
   }
   draw();
+  if (gameOver) return; // endGame() se llamó dentro de este frame; no reprogramar
   animId = requestAnimationFrame(loop);
 }
 
