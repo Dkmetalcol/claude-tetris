@@ -29,6 +29,11 @@
         </div>
 
         <div class="panel-section">
+          <span class="label">COMBO</span>
+          <span class="value" id="combo">0</span>
+        </div>
+
+        <div class="panel-section">
           <span class="label">POWER</span>
           <span class="value" id="power">—</span>
         </div>
@@ -56,7 +61,22 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="record-form" class="record-form hidden">
+          <p id="record-msg"></p>
+          <input id="record-name" type="text" maxlength="12" autocomplete="off" placeholder="Tu nombre" aria-label="Nombre" />
+          <button id="record-save" type="button">Guardar</button>
+        </div>
+        <div id="overlay-records" class="records hidden"></div>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="start-screen" class="overlay start-screen">
+      <div class="overlay-box">
+        <p class="start-title">RECORDS</p>
+        <div id="start-records" class="records"></div>
+        <button id="start-btn" type="button">Jugar</button>
+        <button id="reset-records-btn" class="link-btn" type="button">Borrar records</button>
       </div>
     </div>
   </div>

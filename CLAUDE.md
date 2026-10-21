@@ -28,3 +28,5 @@ Three files: `index.html` (DOM + two canvases), `style.css`, and `game.js` (all 
 - Canvas size is hard-coded in `index.html` (`board` 300×600, `next-canvas` 120×120). If you change `COLS`, `ROWS`, or `BLOCK` in `game.js`, update the canvas `width`/`height` to `COLS*BLOCK` × `ROWS*BLOCK`.
 - The next-piece preview uses a hard-coded 4×4 cell area with `NB = 30` inside `drawNext()`.
 - The README's controls table mentions `X` as an alternate rotate key; the in-page controls list in `index.html` does not.
+
+- Records (`tetris.records` in localStorage) and the start screen: `init(false)` prepares state without starting the rAF loop; `startGame()` calls `init()`. The keydown listener ignores INPUT/SELECT/TEXTAREA targets and, while `#start-screen` is visible, only handles Enter/T.
