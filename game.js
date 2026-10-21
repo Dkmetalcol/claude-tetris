@@ -60,6 +60,12 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeBtn = document.getElementById('theme-toggle');
 const powerEl = document.getElementById('power');
+const pauseMenu = document.getElementById('pause-menu');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const menuControls = document.getElementById('menu-controls');
+const startLevelSel = document.getElementById('start-level');
 
 const THEMES = {
   dark:  { grid: '#22222e', highlight: 'rgba(255,255,255,0.12)' },
@@ -69,6 +75,12 @@ let theme = 'dark';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let nextPowerAt, powerPending, freezeLeft, tintLeft, lastPower;
+let startLevel = 1;  // nivel con el que arranca la siguiente partida (menú de pausa)
+let resumeAt = 0;    // ignora movimiento hasta este instante tras reanudar
+
+function intervalFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -139,8 +151,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = intervalFor(level);
     while (lines >= nextPowerAt) {
       nextPowerAt += POWER_EVERY;
       powerPending = true;
@@ -362,13 +374,16 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    pauseMenu.classList.add('hidden');
+    if (document.activeElement) document.activeElement.blur();
+    resumeAt = performance.now() + 150;
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    startLevelSel.value = String(startLevel);
+    pauseMenu.classList.remove('hidden');
+    resumeBtn.focus();
   }
 }
 
@@ -402,10 +417,10 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = intervalFor(level);
   dropAccum = 0;
   nextPowerAt = POWER_EVERY;
   powerPending = false;
@@ -417,14 +432,21 @@ function init() {
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  pauseMenu.classList.add('hidden');
+  resumeAt = 0;
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if (e.code === 'Escape') { if (!e.repeat && e.target.tagName !== 'SELECT') togglePause(); return; }
+  if (typing) return;
+  if (e.code === 'KeyP') { if (!e.repeat) togglePause(); return; }
   if (e.code === 'KeyT') { toggleTheme(); return; }
   if (paused || gameOver) return;
+  // Tras reanudar, ignora teclas mantenidas / pulsaciones inmediatas
+  if (performance.now() < resumeAt) return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -448,6 +470,18 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', () => { resumeBtn.blur(); if (paused) togglePause(); });
+pauseRestartBtn.addEventListener('click', () => { pauseRestartBtn.blur(); init(); });
+controlsBtn.addEventListener('click', () => {
+  const hidden = menuControls.classList.toggle('hidden');
+  controlsBtn.setAttribute('aria-expanded', String(!hidden));
+  controlsBtn.textContent = hidden ? 'Ver controles' : 'Ocultar controles';
+  controlsBtn.blur();
+});
+startLevelSel.addEventListener('change', () => {
+  startLevel = Number(startLevelSel.value) || 1;
+  startLevelSel.blur();
+});
 themeBtn.addEventListener('click', () => {
   toggleTheme();
   themeBtn.blur(); // evita que Space active el botón
